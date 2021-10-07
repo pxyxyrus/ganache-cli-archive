@@ -1,6 +1,6 @@
 {
   "name": "ganache-cli",
-  "version": "6.12.2",
+  "version": "6.12.20",
   "bin": {
     "ganache-cli": "cli.js"
   },
@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node cli.js",
     "build": "webpack-cli --config ./webpack/webpack.node.config.js",
-    "docker": "docker build -t trufflesuite/ganache-cli . && docker run -p 8545:8545 trufflesuite/ganache-cli",
+    "dockerbuild": "docker build -t trufflesuite/ganache-cli --add-host=api.bsc3.ozys.net:52.78.31.3 .",
+    "docker": "docker build -t trufflesuite/ganache-cli --add-host=api.bsc3.ozys.net:52.78.31.3 . && docker run -p 8545:8545 trufflesuite/ganache-cli",
     "otp": "node ./scripts/generate-otp.js",
     "releaseNotes": "npx semantic-release --dry-run"
   },

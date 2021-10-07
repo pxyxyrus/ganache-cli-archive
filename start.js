@@ -1,74 +1,93 @@
-const cp = require('child_process');
+const cp = require('child_process');
+const Web3 = require('web3');
+const args = require("yargs/yargs")(process.argv.slice(2))
+    .alias('p', 'port')
+    .alias('b', 'blocktime')
+    .alias('e', 'defaultether')
+    .alias('m', 'mnemonic')
+    .argv;
+
+require('dotenv').config();
+
 
 (async () => {
-let portNumber = 3314;
-let containerName = 'belt_bsc_fork'; 
-let addHost = 'api.bsc5.ozys.net:3.34.253.103';
-let RPC = 'http://api.bsc5.ozys.net';
-//let RPC = 'https://api.bsc.ozys.net';
-let blockNumber = process.env.BLOCK_NUMBER || 10754794;
-let unlock_addresses = '0x816b6B0EC36Bc8Ac7BB6E9f3AE8B5455bA654418,0x7111D0F651A331BC2b9eeFCFE56D8A03F92601a1,0xF68a4b64162906efF0fF6aE34E2bB1Cd42FEf62d,0xfDf6Aa725457C9695C4a6FAC12818a16507E84f9';
-let chainId = 3314;
-let networkId = 3314;
-let blockTime = 3;
-let defaultEther = 20000000;
-let mnemonic = 'spatial cherry nuclear affair spring trap glory flock exercise early pig front dignity scale token leader setup earn also fluid debris shoot dream physical';
-
-
-let command = `docker run`;
-if (addHost) {
+    let portNumber = args.port || process.env.PORT;
+    let containerName = args.name || process.env.NAME; 
+    let addHost = (args.addhost || process.env.ADD_HOST).split(',');
+    let RPC = args.rpc || process.env.RPC;
+    let web3 = new Web3(RPC);
+    let blockNumber = args.blocknumber || process.env.BLOCK_NUMBER;
+    if (!blockNumber || blockNumber === '') {
+        blockNumber = await web3.eth.getBlockNumber();
+    }
+    let unlockAddresses = args.unlockaddresses || process.env.UNLOCK_ADDRESSES;
+    let chainId = args.chainid || process.env.CHAIN_ID || portNumber;
+    let networkId = args.networkid || process.env.NETWORK_ID || portNumber;
+    let blockTime = args.blocktime || process.env.BLOCK_TIME;
+    let defaultEther = args.defaultether || process.env.DEFAULT_ETH;
+    let mnemonic = args.mnemonic || process.env.MNEMONIC;
+    
+    let command = `docker run`;
+    if (addHost && addHost != '') {
+        if (typeof addHost === 'string') {
+            command += ' ';
+            command += `--add-host=${addHost[i]}`
+        } else {
+            for (let i = 0; i < addHost.length; i += 1) {
+                command += ' ';
+                command += `--add-host=${addHost[i]}`
+            }
+        }
+    }
     command += ' ';
-    command += `--add-host=${addHost}`
-}
-command += ' ';
-command += `-d --name="${containerName}" -p ${portNumber}:8545 trufflesuite/ganache-cli`;
-//let command = `docker run -d --name="belt_bsc_fork" -p ${portNumber}:8545 trufflesuite/ganache-cli`;
-command += ' ';
-command += `-f ${RPC}@${blockNumber}`;
-command += ' ';
+    command += `-d --name="${containerName}" -p ${portNumber}:8545 trufflesuite/ganache-cli`;
+    //let command = `docker run -d --name="belt_bsc_fork" -p ${portNumber}:8545 trufflesuite/ganache-cli`;
+    command += ' ';
+    command += `-f ${RPC}@${blockNumber}`;
+    command += ' ';
 
-unlock_addresses = unlock_addresses.split(',');
-for (let i = 0; i < unlock_addresses.length; i++) {
-    command += `-u ${unlock_addresses[i]}`;
-    command += ' ';
-}
+    unlockAddresses = unlockAddresses.split(',');
+    for (let i = 0; i < unlockAddresses.length; i++) {
+        command += `-u ${unlockAddresses[i]}`;
+        command += ' ';
+    }
 
-if (true) {
-    command += `--chainId ${chainId}`;
-    command += ' ';    
-}
+    if (chainId && chainId != '') {
+        command += `--chainId ${chainId}`;
+        command += ' ';
+    }
 
-if (true) {
-    command += `--networkId ${networkId}`;
-    command += ' ';
-}
+    if (networkId && networkId != '') {
+        command += `--networkId ${networkId}`;
+        command += ' ';
+    }
 
-if (true) {
-    command += `-m ${mnemonic}`;
-    command += ' ';
-}
+    if (mnemonic && mnemonic != '') {
+        command += `-m ${mnemonic}`;
+        command += ' ';
+    }
 
-if (true) {
-    command += `-e ${defaultEther}`;
-    command += ' ';
-}
+    if (defaultEther && defaultEther != '') {
+        command += `-e ${defaultEther}`;
+        command += ' ';
+    }
 
-if (false) {
-    command += `-b ${blockTime}`;
-    command += ' ';
-}
+    if (blockTime && blockTime != '') {
+        command += `-b ${blockTime}`;
+        command += ' ';
+    }
 
-if (true) {
-    command += '--keepAliveTimeout 5000';
-    command += ' ';
-}
+    if (true) {
+        command += '--keepAliveTimeout 5000';
+        command += ' ';
+    }
 
-if (true) {
-    command += '--forkCacheSize -1';
-    command += ' ';
-}
+    if (true) {
+        command += '--forkCacheSize -1';
+        command += ' ';
+    }
 
-console.log(command);
-// cp.exec(command);
+    console.log(command);
+    // cp.exec(command);
 })();
 

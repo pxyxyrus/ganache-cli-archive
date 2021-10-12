@@ -66,7 +66,7 @@ require('dotenv').config();
         command += `-m ${mnemonic}`;
         command += ' ';
     }
-
+    
     if (defaultEther && defaultEther != '') {
         command += `-e ${defaultEther}`;
         command += ' ';
